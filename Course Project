@@ -1,0 +1,103 @@
+from datetime import datetime
+
+class TamalesOrders:
+#Dictionary is used for the menu
+    menu = {
+        1: {'name' : 'Chuchito', 'price' : 6.50},
+        2: {'name' : 'Guatemalan Style', 'price' : 8.00},
+        3: {'name' : 'Tamal de Elote', 'price' : 6.00},
+        4: {'name' : 'Chile Verde Tamal', 'price' : 7.00},
+        5: {'name' : 'Tamal de Pollo(Chicken)', 'price' : 6.00},
+        6: {'name' : 'Tamal de Res(Beef)', 'price' : 6.00},
+        7: {'name' : 'Tamal de Puerco(Pork)', 'price' : 6.50},
+        8: {'name' : 'Tamal de Pache(Potato)', 'price' : 6.00}
+    }
+
+    def __init__(self, name):
+        self.name = name
+        self.order_items = {}
+        self.del_date = None
+
+#Displays the menu and prints the welcoming to customers
+    def display_menu(self):
+        print("\n---------- Welcome to Isa's Tamales!-----------")
+        print("\n---------------- Tamale Menu ----------------")
+        for item_id, item_details in self.menu.items():
+            print(f"{item_id}. {item_details['name']} - ${item_details['price']:.2f}")
+            print('\n--------------------------------------------')
+
+#This function allows the customer to select the type of tamales they want to eat
+    def choosing_order(self):
+        while True:
+            self.display_menu()
+            try:
+                selecting = input("Enter the menu number you'd like to order (Enter 'done' when finished): ").lower()
+                if selecting == 'done':
+                    break
+
+                item_id = int(selecting)
+                if item_id in self.menu:
+                    quantity = int(input(f"How many {self.menu[item_id]['name']} would you like?: "))
+                    if quantity > 0:
+                        self.order_items[item_id] = self.order_items.get(item_id, 0) + quantity
+                        print(f"{quantity} {self.menu[item_id]['name']} added to your order.")
+
+                else:
+                    print('Invalid menu number, please try again.')
+            except ValueError:
+                print('Invalid input, must enter number or "done". ')
+
+        self.display_order()
+
+    #Asks for the delivery time and date
+    def set_delivery_time_and_date(self, start_year=2025, end_year=2026):
+        while True:
+            try:
+                date_str = input(f"Enter desired delivery date (MM/DD/YYYY between {start_year} and {end_year}): ")
+                time_str = input("Enter desired delivery time (HH:MM AM/PM): ")
+                
+                # Combine date and time strings and parse them into a datetime object
+                full_datetime_str = f"{date_str} {time_str}"
+                delivery_dt = datetime.strptime(full_datetime_str, "%m/%d/%Y %I:%M %p")
+
+                # Validate the year within the specified range
+                if not (start_year <= delivery_dt.year <= end_year):
+                    print(f"Delivery date year must be between {start_year} and {end_year}. Please try again.")
+                    continue
+
+                self.del_date = delivery_dt
+                print(f"Delivery scheduled for: {self.del_date.strftime('%A, %B %d, %Y at %I:%M %p')}")
+                break
+            except ValueError:
+                print("Invalid date or time format. Please use MM/DD/YYYY and HH:MM AM/PM.")
+
+    #This shows the summary of the customer's order
+    def display_order(self):
+        if not self.order_items:
+            print(f'\n{self.name}, your order is empty.')
+            return
+
+        print(f'\n----- Order Summary for {self.name}-----')
+        cost = 0
+        for item_id, quantity in self.order_items.items():
+            item_details = self.menu[item_id]
+            item_name = item_details['name']
+            item_price = item_details['price']
+            subtotal = quantity * item_price
+            print(f'{item_name} x {quantity} = ${subtotal:.2f}')
+            cost += subtotal
+        print(f'Total: ${cost:.2f}')
+
+        if self.del_date:
+            print(f'Delivery on: {self.del_date.strftime("%A, %B %d, %Y at %I:%M %p")}')
+        else:
+            print('Delivery date and time not set,')
+        print('\n----------------------------------------')
+
+
+if __name__ == '__main__':
+    name = input('What is your name?: ')
+    order = TamalesOrders(name)
+    order.choosing_order()
+    order.set_delivery_time_and_date(start_year=2025, end_year=2026)
+    order.display_order()
